@@ -542,3 +542,52 @@ function handleContactSubmit(event) {
         submitBtn.disabled = false;
     });
 }
+
+function renderMessages() {
+    const tbody = document.getElementById('messages-tbody');
+    const noMessages = document.getElementById('no-messages');
+    if (!tbody) return;
+
+    fetch('get_messages.php')
+        .then(response => response.json())
+        .then(data => {
+            tbody.innerHTML = '';
+            if (!data.messages || !data.messages.length) {
+                noMessages.style.display = 'block';
+                return;
+            }
+            noMessages.style.display = 'none';
+            data.messages.forEach(msg => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${msg.name || 'Vendég'}</td>
+                    <td>${msg.email}</td>
+                    <td>${msg.message}</td>
+                    <td>${msg.created_at}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        })
+        .catch(() => {
+            noMessages.textContent = 'Hiba az üzenetek betöltésekor.';
+            noMessages.style.display = 'block';
+        });
+}
+
+window.initApp = initApp;
+window.showPage = showPage;
+window.handleLogin = handleLogin;
+window.handleRegister = handleRegister;
+window.logout = logout;
+window.showCrudForm = showCrudForm;
+window.hideCrudForm = hideCrudForm;
+window.handlePizzaSubmit = handlePizzaSubmit;
+window.editPizza = editPizza;
+window.deletePizza = deletePizza;
+window.handleImageUpload = handleImageUpload;
+window.handleContactSubmit = handleContactSubmit;
+
+window.addEventListener('hashchange', () => {
+    const page = window.location.hash.replace('#', '') || 'home';
+    showPage(page);
+});
