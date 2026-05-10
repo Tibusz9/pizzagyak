@@ -22,3 +22,15 @@ if ($conn->connect_error) {
     echo json_encode(['error' => 'Adatbázis kapcsolat hiba: ' . $conn->connect_error]);
     exit();
 }
+
+$conn->set_charset('utf8');
+
+// POST kérés ellenőrzése
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    if (ob_get_length()) {
+        ob_clean();
+    }
+    http_response_code(405);
+    echo json_encode(['error' => 'Csak POST kérés megengedett']);
+    exit();
+}
