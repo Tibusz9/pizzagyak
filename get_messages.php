@@ -33,3 +33,13 @@ if (!$result) {
     echo json_encode(['error' => 'Lekérdezési hiba: ' . $conn->error]);
     exit();
 }
+
+$messages = [];
+while ($row = $result->fetch_assoc()) {
+    $messages[] = $row;
+}
+
+echo json_encode(['success' => true, 'messages' => $messages]);
+
+$conn->close();
+?>
