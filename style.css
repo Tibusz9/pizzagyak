@@ -4,3 +4,13 @@ body {
     color: #333;
     background-color: #f9f9f9;
 }
+/* HEADER & NAVIGATION */
+header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
