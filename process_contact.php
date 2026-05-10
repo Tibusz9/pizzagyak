@@ -93,3 +93,45 @@ if (!empty($errors)) {
     echo json_encode(['error' => $errors]);
     exit();
 }
+
+// Adatok előkészítése
+$name = trim($input['name']);
+$email = trim($input['email']);
+$subject = trim($input['subject']);
+$message = trim($input['message']);
+
+// Adatok beszúrása az adatbázisba
+$stmt = $conn->prepare('INSERT INTO messages (name, email, subject, message) VALUES (?, ?, ?, ?)');
+
+if (!$stmt) {
+    if (ob_get_length()) {
+        ob_clean();
+    }
+    http_response_code(500);
+    echo json_encode(['error' => 'Prepared statement hiba: ' . $conn->error]);
+    exit();
+}
+
+$stmt->bind_param('ssss', $name, $email, $subject, $message);
+
+if ($stmt->execute()) {
+    if (ob_get_length()) {
+        ob_clean();
+    }
+    http_response_code(201);
+    echo json_encode([
+        'success' => true,
+        'message' => 'Az üzenet sikeresen elküldve!',
+        'id' => $stmt->insert_id
+    ]);
+} else {
+    if (ob_get_length()) {
+        ob_clean();
+    }
+    http_response_code(500);
+    echo json_encode(['error' => 'Hiba az üzenet mentése során: ' . $stmt->error]);
+}
+
+$stmt->close();
+$conn->close();
+?>
