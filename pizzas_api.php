@@ -27,3 +27,25 @@ if ($conn->connect_error) {
     echo json_encode(['error' => 'Adatbázis kapcsolat hiba: ' . $conn->connect_error]);
     exit();
 }
+
+$conn->set_charset('utf8');
+
+$conn->query(
+    "CREATE TABLE IF NOT EXISTS pizzas (
+        id INT(11) NOT NULL AUTO_INCREMENT,
+        name VARCHAR(100) NOT NULL,
+        category VARCHAR(50) NOT NULL,
+        price INT(11) NOT NULL,
+        vegetarian TINYINT(1) NOT NULL DEFAULT 0,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci"
+);
+
+$defaultPizzas = [
+    ['Margherita', 'főnemes', 950, 1],
+    ['Pepperoni', 'király', 1250, 0],
+    ['Hawaii', 'lovag', 1150, 0],
+    ['Vegetár', 'apród', 850, 1]
+];
