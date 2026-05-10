@@ -68,3 +68,62 @@ function json_input()
     $input = json_decode(file_get_contents('php://input'), true);
     return is_array($input) ? $input : [];
 }
+
+function category_price($category)
+{
+    $prices = [
+        'apród' => 850,
+        'lovag' => 1150,
+        'király' => 1250,
+        'főnemes' => 950
+    ];
+
+    return isset($prices[$category]) ? $prices[$category] : 0;
+}
+
+$method = $_SERVER['REQUEST_METHOD'];
+
+if ($method === 'GET') {
+    $result = $conn->query('SELECT id, name, category, price, vegetarian, created_at FROM pizzas ORDER BY created_at DESC, id DESC');
+    if (!$result) {
+        if (ob_get_length()) {
+            ob_clean();
+        }
+        http_response_code(500);
+        echo json_encode(['error' => 'Lekérdezési hiba: ' . $conn->error]);
+        exit();
+    }
+
+    $pizzas = [];
+    while ($row = $result->fetch_assoc()) {
+        $row['vegetarian'] = (bool)$row['vegetarian'];
+        $pizzas[] = $row;
+    }
+
+    echo json_encode(['success' => true, 'pizzas' => $pizzas]);
+    $conn->close();
+    exit();
+}
+
+$input = json_input();
+$id = isset($input['id']) ? (int)$input['id'] : 0;
+$name = isset($input['name']) ? trim($input['name']) : '';
+$category = isset($input['category']) ? trim($input['category']) : '';
+$vegetarian = !empty($input['vegetarian']) ? 1 : 0;
+
+if ($method === 'POST') {
+    if ($name === '' || $category === '') {
+        http_response_code(400);
+        echo json_encode(['error' => 'A pizza neve és kategóriája kötelező.']);
+        $conn->close();
+        exit();
+    }
+
+    $price = category_price($category);
+    $stmt = $conn->prepare('INSERT INTO pizzas (name, category, price, vegetarian) VALUES (?, ?, ?, ?)');
+    if (!$stmt) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Prepared statement hiba: ' . $conn->error]);
+        $conn->close();
+        exit();
+    }
