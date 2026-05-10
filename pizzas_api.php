@@ -49,3 +49,22 @@ $defaultPizzas = [
     ['Hawaii', 'lovag', 1150, 0],
     ['Vegetár', 'apród', 850, 1]
 ];
+
+$countResult = $conn->query('SELECT COUNT(*) AS count FROM pizzas');
+if ($countResult) {
+    $countRow = $countResult->fetch_assoc();
+    if ((int)$countRow['count'] === 0) {
+        $seedStmt = $conn->prepare('INSERT INTO pizzas (name, category, price, vegetarian) VALUES (?, ?, ?, ?)');
+        foreach ($defaultPizzas as $pizza) {
+            $seedStmt->bind_param('ssii', $pizza[0], $pizza[1], $pizza[2], $pizza[3]);
+            $seedStmt->execute();
+        }
+        $seedStmt->close();
+    }
+}
+
+function json_input()
+{
+    $input = json_decode(file_get_contents('php://input'), true);
+    return is_array($input) ? $input : [];
+}
