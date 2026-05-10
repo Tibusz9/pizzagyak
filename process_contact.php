@@ -83,3 +83,13 @@ if (empty($input['message']) || !is_string($input['message'])) {
         $errors[] = 'Az üzenet 5-5000 karakter között kell legyen.';
     }
 }
+
+// Ha vannak hibák, visszaadunk
+if (!empty($errors)) {
+    if (ob_get_length()) {
+        ob_clean();
+    }
+    http_response_code(400);
+    echo json_encode(['error' => $errors]);
+    exit();
+}
