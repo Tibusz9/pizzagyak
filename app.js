@@ -339,3 +339,206 @@ async function renderPizzas() {
         tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Hiba a pizzák betöltésekor: ${error.message}</td></tr>`;
     }
 }
+
+function editPizza(pizzaId) {
+    const pizza = pizzaCache.find(p => String(p.id) === String(pizzaId));
+    if (pizza) {
+        showCrudForm(true, pizza);
+    }
+}
+
+function deletePizza(pizzaId) {
+    if (!confirm('Biztosan törli a pizzát?')) return;
+    fetch(PIZZAS_API, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id: Number(pizzaId) })
+    })
+        .then(async response => {
+            const text = await response.text();
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (error) {
+                throw new Error(`Válasz nem JSON: ${text}`);
+            }
+
+            if (!response.ok) {
+                throw new Error(data.error || `Szerverhiba (${response.status})`);
+            }
+
+            return data;
+        })
+        .then(() => renderPizzas())
+        .catch(error => {
+            alert(`Hiba: ${error.message}`);
+        });
+}
+
+function renderImages() {
+    const grid = document.getElementById('images-grid');
+    if (!grid) return;
+    const images = getStorage(STORAGE_KEYS.images) || [];
+    grid.innerHTML = '';
+
+    if (!images.length) {
+        grid.innerHTML = '<div class="card"><p>Nincsenek feltöltött képek még. Jelentkezzen be és töltsön fel egy fényképet.</p></div>';
+        return;
+    }
+
+    images.forEach(image => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            <img src="${image.data}" alt="Feltöltött pizza kép">
+            <h3>${image.name}</h3>
+            <p>Feltöltve: ${new Date(image.uploadedAt).toLocaleString()}</p>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+function handleImageUpload(event) {
+    event.preventDefault();
+    if (!getCurrentUser()) {
+        alert('Képet csak bejelentkezett felhasználó tölthet fel.');
+        window.location.href = 'auth.html';
+        return;
+    }
+    const fileInput = document.getElementById('image-input');
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert('Válasszon ki egy képfájlt.');
+        return;
+    }
+    if (!file.type.startsWith('image/')) {
+        alert('Csak képfájlokat tölthet fel.');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function () {
+        const images = getStorage(STORAGE_KEYS.images) || [];
+        images.push({
+            name: file.name,
+            data: reader.result,
+            uploadedAt: Date.now()
+        });
+        setStorage(STORAGE_KEYS.images, images);
+        renderImages();
+        fileInput.value = '';
+        alert('A kép feltöltése sikeres.');
+    };
+    reader.readAsDataURL(file);
+}
+
+function handleContactSubmit(event) {
+    event.preventDefault();
+    const name = document.getElementById('contact-name').value.trim();
+    const email = document.getElementById('contact-email').value.trim();
+    const subject = document.getElementById('contact-subject').value.trim();
+    const message = document.getElementById('contact-message').value.trim();
+    const currentUser = getCurrentUser();
+    const senderName = currentUser ? `${currentUser.lastName} ${currentUser.firstName}` : 'Vendég';
+    
+    // Kliens-oldali validáció
+    const errors = [];
+
+    if (!name || !email || !subject || !message) {
+        errors.push('Minden mező kitöltése kötelező.');
+    }
+    if (!validateEmail(email)) {
+        errors.push('Érvényes email címet adjon meg.');
+    }
+
+    const errorBox = document.getElementById('contact-errors');
+    const successBox = document.getElementById('contact-success');
+    
+    if (errors.length) {
+        errorBox.innerHTML = errors.map(msg => `<p class="error">${msg}</p>`).join('');
+        errorBox.style.display = 'block';
+        successBox.style.display = 'none';
+        return;
+    }
+
+    // Küldés szerverre AJAX-al
+    errorBox.style.display = 'none';
+    successBox.style.display = 'none';
+    
+    // Töltés jelzés
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Küldés folyamatban...';
+    submitBtn.disabled = true;
+
+    fetch('process_contact.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            name: senderName,
+            email: email,
+            subject: subject,
+            message: message
+        })
+    })
+    .then(async response => {
+        const responseText = await response.text();
+        let data;
+
+        try {
+            data = JSON.parse(responseText);
+        } catch (parseError) {
+            throw new Error(`Válasz nem JSON: ${responseText}`);
+        }
+
+        if (!response.ok) {
+            throw new Error(data.error || `Szerverhiba (${response.status})`);
+        }
+
+        return data;
+    })
+    .then(data => {
+        if (data.success) {
+            // Siker
+            successBox.style.display = 'block';
+            errorBox.style.display = 'none';
+            document.querySelector('form.form').reset();
+            
+            // LocalStorage-ba is mentjük
+            const messages = getStorage(STORAGE_KEYS.messages) || [];
+            messages.push({
+                name: senderName,
+                email: email,
+                subject: subject,
+                message: message,
+                createdAt: Date.now()
+            });
+            setStorage(STORAGE_KEYS.messages, messages);
+            renderMessages();
+        } else {
+            // Hiba
+            if (data.error && Array.isArray(data.error)) {
+                errorBox.innerHTML = data.error.map(msg => `<p class="error">${msg}</p>`).join('');
+            } else {
+                errorBox.innerHTML = `<p class="error">${data.error || 'Ismeretlen hiba'}</p>`;
+            }
+            errorBox.style.display = 'block';
+            successBox.style.display = 'none';
+        }
+    })
+    .catch(error => {
+        console.error('Hiba:', error);
+        errorBox.innerHTML = `<p class="error">Hálózati hiba: ${error.message}</p>`;
+        errorBox.style.display = 'block';
+        successBox.style.display = 'none';
+    })
+    .finally(() => {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    });
+}
