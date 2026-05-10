@@ -224,3 +224,107 @@ main {
 .form-group {
     margin-bottom: 1.5rem;
 }
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: 0.3s;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+}
+
+.form-group small {
+    display: block;
+    margin-top: 0.3rem;
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    padding: 0.8rem 1.5rem;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-left: 0.5rem;
+}
+
+.btn-secondary:hover {
+    background: #e0e0e0;
+}
+
+/* ERRORS & SUCCESS */
+.errors {
+    background: #fee;
+    border-left: 4px solid #ff6b6b;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 5px;
+}
+
+.error {
+    color: #c33;
+    margin: 0.5rem 0;
+}
+
+.success-message {
+    background: #efe;
+    border-left: 4px solid #28a745;
+    padding: 2rem;
+    border-radius: 5px;
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.success-message h3 {
+    color: #28a745;
+    margin-bottom: 1rem;
+}
+
+/* TABLES */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
