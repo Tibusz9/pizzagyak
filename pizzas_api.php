@@ -127,3 +127,44 @@ if ($method === 'POST') {
         $conn->close();
         exit();
     }
+
+    $stmt->bind_param('ssii', $name, $category, $price, $vegetarian);
+    if ($stmt->execute()) {
+        echo json_encode(['success' => true, 'id' => $stmt->insert_id]);
+    } else {
+        http_response_code(500);
+        echo json_encode(['error' => 'Hiba a pizza mentése során: ' . $stmt->error]);
+    }
+    $stmt->close();
+    $conn->close();
+    exit();
+}
+
+if ($method === 'PUT') {
+    if ($id <= 0 || $name === '' || $category === '') {
+        http_response_code(400);
+        echo json_encode(['error' => 'Érvénytelen pizza adat.']);
+        $conn->close();
+        exit();
+    }
+
+    $price = category_price($category);
+    $stmt = $conn->prepare('UPDATE pizzas SET name = ?, category = ?, price = ?, vegetarian = ? WHERE id = ?');
+    if (!$stmt) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Prepared statement hiba: ' . $conn->error]);
+        $conn->close();
+        exit();
+    }
+
+    $stmt->bind_param('sssii', $name, $category, $price, $vegetarian, $id);
+    if ($stmt->execute()) {
+        echo json_encode(['success' => true]);
+    } else {
+        http_response_code(500);
+        echo json_encode(['error' => 'Hiba a pizza módosítása során: ' . $stmt->error]);
+    }
+    $stmt->close();
+    $conn->close();
+    exit();
+}
