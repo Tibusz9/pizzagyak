@@ -25,3 +25,11 @@ $conn->set_charset('utf8');
 
 $result = $conn->query('SELECT name, email, subject, message, created_at FROM messages ORDER BY created_at DESC');
 
+if (!$result) {
+    if (ob_get_length()) {
+        ob_clean();
+    }
+    http_response_code(500);
+    echo json_encode(['error' => 'Lekérdezési hiba: ' . $conn->error]);
+    exit();
+}
