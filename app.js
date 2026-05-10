@@ -218,3 +218,124 @@ function handleRegister(event) {
 function validateEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
+
+function logout() {
+    localStorage.removeItem(STORAGE_KEYS.session);
+    updateNavUI();
+    showPage('home');
+    alert('Sikeresen kijelentkezett.');
+}
+
+function showCrudForm(editMode = false, pizza = null) {
+    const formContainer = document.getElementById('crud-form');
+    formContainer.style.display = 'block';
+    if (editMode && pizza) {
+        document.getElementById('pizza-id').value = pizza.id;
+        document.getElementById('pizza-name').value = pizza.name;
+        document.getElementById('pizza-category').value = pizza.category;
+        document.getElementById('pizza-vego').checked = pizza.vegetarian;
+    } else {
+        document.getElementById('pizza-id').value = '';
+        document.getElementById('pizza-name').value = '';
+        document.getElementById('pizza-category').value = '';
+        document.getElementById('pizza-vego').checked = false;
+    }
+}
+
+function hideCrudForm() {
+    document.getElementById('crud-form').style.display = 'none';
+}
+
+function handlePizzaSubmit(event) {
+    event.preventDefault();
+    const id = document.getElementById('pizza-id').value;
+    const name = document.getElementById('pizza-name').value.trim();
+    const category = document.getElementById('pizza-category').value;
+    const vegetarian = document.getElementById('pizza-vego').checked;
+    const errors = [];
+
+    if (!name || !category) {
+        errors.push('A pizza neve és kategóriája kötelező.');
+    }
+
+    if (errors.length) {
+        alert(errors.join('\n'));
+        return;
+    }
+
+    fetch(PIZZAS_API, {
+        method: id ? 'PUT' : 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            id: id ? Number(id) : undefined,
+            name,
+            category,
+            vegetarian
+        })
+    })
+        .then(async response => {
+            const text = await response.text();
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (error) {
+                throw new Error(`Válasz nem JSON: ${text}`);
+            }
+
+            if (!response.ok) {
+                throw new Error(data.error || `Szerverhiba (${response.status})`);
+            }
+
+            return data;
+        })
+        .then(() => {
+            renderPizzas();
+            hideCrudForm();
+            alert(id ? 'A pizza módosítva lett.' : 'A pizza hozzáadva lett.');
+        })
+        .catch(error => {
+            alert(`Hiba: ${error.message}`);
+        });
+}
+
+async function renderPizzas() {
+    const tbody = document.getElementById('pizzas-tbody');
+    if (!tbody) return;
+
+    try {
+        const response = await fetch(PIZZAS_API);
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.error || 'Nem sikerült betölteni a pizzákat.');
+        }
+
+        pizzaCache = data.pizzas || [];
+        tbody.innerHTML = '';
+
+        if (!pizzaCache.length) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nincsenek pizzák az adatbázisban.</td></tr>';
+            return;
+        }
+
+        pizzaCache.forEach(pizza => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${pizza.name}</td>
+                <td>${pizza.category}</td>
+                <td>${pizza.price} Ft</td>
+                <td>${pizza.vegetarian ? 'Igen' : 'Nem'}</td>
+                <td>
+                    <div class="action-btns">
+                        <button class="btn-edit" onclick='editPizza("${pizza.id}")'>Szerkesztés</button>
+                        <button class="btn-delete" onclick='deletePizza("${pizza.id}")'>Törlés</button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (error) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Hiba a pizzák betöltésekor: ${error.message}</td></tr>`;
+    }
+}
