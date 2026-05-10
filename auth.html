@@ -24,3 +24,22 @@
             </div>
         </nav>
     </header>
+
+        <main class="container">
+        <div class="auth-container">
+            <h2>Belépés és Regisztráció</h2>
+            
+
+            <div class="tabs">
+                <button type="button" class="tab-btn active" onclick="showTab('login')">Bejelentkezés</button>
+                <button type="button" class="tab-btn" onclick="showTab('register')">Regisztráció</button>
+            </div>
+
+            <div id="login" class="tab-content active">
+                <form class="form" onsubmit="handleLogin(event)">
+                    <div id="login-errors" class="errors" style="display:none;"></div>
+                    <div class="form-group"><label for="login-username">Felhasználónév:</label><input type="text" id="login-username" required></div>
+                    <div class="form-group"><label for="login-password">Jelszó:</label><input type="password" id="login-password" required></div>
+                    <button type="submit" class="btn-primary">Bejelentkezés</button>
+                </form>
+            </div>
