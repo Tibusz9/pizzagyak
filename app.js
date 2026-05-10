@@ -62,3 +62,30 @@ function initApp() {
 function getCurrentUser() {
     return getStorage(STORAGE_KEYS.session);
 }
+
+function updateNavUI() {
+    const user = getCurrentUser();
+    const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const messagesLink = document.getElementById('messages-link');
+    const userInfo = document.getElementById('user-info');
+    const uploadSection = document.getElementById('upload-section');
+
+    const loginNotice = document.getElementById('login-notice');
+    if (user) {
+        loginBtn.style.display = 'none';
+        logoutBtn.style.display = 'inline-block';
+        messagesLink.style.display = 'inline-block';
+        userInfo.style.display = 'inline-block';
+        userInfo.textContent = `Bejelentkezett: ${user.lastName} ${user.firstName} (${user.username})`;
+        if (uploadSection) uploadSection.style.display = 'block';
+        if (loginNotice) loginNotice.style.display = 'none';
+    } else {
+        loginBtn.style.display = 'inline-block';
+        logoutBtn.style.display = 'none';
+        messagesLink.style.display = 'none';
+        userInfo.style.display = 'none';
+        if (uploadSection) uploadSection.style.display = 'none';
+        if (loginNotice) loginNotice.style.display = 'block';
+    }
+}
