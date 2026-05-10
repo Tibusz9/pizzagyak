@@ -127,3 +127,41 @@ function showTab(tab) {
         content.classList.toggle('active', content.id === tab);
     });
 }
+
+function handleLogin(event) {
+    event.preventDefault();
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value;
+    const errors = [];
+
+    if (!username || !password) {
+        errors.push('Mindkét mező kitöltése kötelező.');
+    }
+
+    const users = getStorage(STORAGE_KEYS.users) || [];
+    const registeredUser = users.find(u => u.username === username && u.password === btoa(password));
+    const isFixedUser = username === fixedUser.username && password === fixedUser.password;
+
+    if (!isFixedUser && !registeredUser) {
+        errors.push('Hibás felhasználónév vagy jelszó.');
+    }
+
+    const errorBox = document.getElementById('login-errors');
+    if (errors.length) {
+        errorBox.innerHTML = errors.map(msg => `<p class="error">${msg}</p>`).join('');
+        errorBox.style.display = 'block';
+        return;
+    }
+
+    errorBox.style.display = 'none';
+    const activeUser = isFixedUser ? fixedUser : registeredUser;
+    setStorage(STORAGE_KEYS.session, {
+        username: activeUser.username,
+        firstName: activeUser.firstName,
+        lastName: activeUser.lastName,
+        email: activeUser.email
+    });
+    updateNavUI();
+    alert('Sikeres bejelentkezés!');
+    window.location.href = 'index.html';
+}
