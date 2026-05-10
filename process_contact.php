@@ -63,3 +63,13 @@ if (empty($input['email']) || !is_string($input['email'])) {
         $errors[] = 'Az email túl hosszú.';
     }
 }
+
+// Tárgy validáció
+if (empty($input['subject']) || !is_string($input['subject'])) {
+    $errors[] = 'A tárgy mező kötelező.';
+} else {
+    $subject = trim($input['subject']);
+    if (strlen($subject) < 2 || strlen($subject) > 200) {
+        $errors[] = 'A tárgy 2-200 karakter között kell legyen.';
+    }
+}
