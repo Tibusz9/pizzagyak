@@ -168,3 +168,36 @@ if ($method === 'PUT') {
     $conn->close();
     exit();
 }
+
+if ($method === 'DELETE') {
+    if ($id <= 0) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Hiányzó pizza azonosító.']);
+        $conn->close();
+        exit();
+    }
+
+    $stmt = $conn->prepare('DELETE FROM pizzas WHERE id = ?');
+    if (!$stmt) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Prepared statement hiba: ' . $conn->error]);
+        $conn->close();
+        exit();
+    }
+
+    $stmt->bind_param('i', $id);
+    if ($stmt->execute()) {
+        echo json_encode(['success' => true]);
+    } else {
+        http_response_code(500);
+        echo json_encode(['error' => 'Hiba a pizza törlése során: ' . $stmt->error]);
+    }
+    $stmt->close();
+    $conn->close();
+    exit();
+}
+
+http_response_code(405);
+echo json_encode(['error' => 'Nem támogatott kérés']);
+$conn->close();
+?>
