@@ -89,3 +89,41 @@ function updateNavUI() {
         if (loginNotice) loginNotice.style.display = 'block';
     }
 }
+
+function showPage(page) {
+    const pages = document.querySelectorAll('.page');
+    pages.forEach((element) => {
+        element.style.display = 'none';
+    });
+
+    const target = document.getElementById(`${page}-page`);
+    if (target) {
+        target.style.display = 'block';
+        window.location.hash = page;
+    } else {
+        document.getElementById('home-page').style.display = 'block';
+        window.location.hash = 'home';
+    }
+
+    if (page === 'messages' && !getCurrentUser()) {
+        showPage('auth');
+        alert('Az üzenetek megtekintéséhez jelentkezzen be.');
+    }
+
+    if (page === 'auth') {
+        showTab('login');
+    }
+}
+
+function showTab(tab) {
+    const tabs = document.querySelectorAll('.tab-btn');
+    const contents = document.querySelectorAll('.tab-content');
+
+    tabs.forEach(button => {
+        button.classList.toggle('active', button.textContent.trim() === (tab === 'login' ? 'Bejelentkezés' : 'Regisztráció'));
+    });
+
+    contents.forEach(content => {
+        content.classList.toggle('active', content.id === tab);
+    });
+}
