@@ -16,3 +16,14 @@ $servername = 'localhost';
 $username = 'pizza12';
 $password = 'Pizza12.';
 $dbname = 'pizza12';
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    if (ob_get_length()) {
+        ob_clean();
+    }
+    http_response_code(500);
+    echo json_encode(['error' => 'Adatbázis kapcsolat hiba: ' . $conn->connect_error]);
+    exit();
+}
