@@ -33,3 +33,16 @@
             </div>
             <button onclick="showCrudForm()" class="btn-primary crud-add-btn">Új Pizza</button>
         </section>
+            <section id="crud-form" class="crud-form-card" style="display:none;">
+            <form class="crud-form" onsubmit="handlePizzaSubmit(event)">
+                <h3>Pizza hozzáadása / szerkesztése</h3>
+                <input type="hidden" id="pizza-id">
+                <div class="form-group"><label for="pizza-name">Pizza neve:</label><input type="text" id="pizza-name" required></div>
+                <div class="form-group"><label for="pizza-category">Kategória:</label><select id="pizza-category" required><option value="">-- Válasszon --</option><option value="apród">apród - 850 Ft</option><option value="lovag">lovag - 1150 Ft</option><option value="király">király - 1250 Ft</option><option value="főnemes">főnemes - 950 Ft</option></select></div>
+                <div class="form-group crud-checkbox"><label><input type="checkbox" id="pizza-vego"> Vegetáriánus</label></div>
+                <div class="crud-form-actions">
+                    <button type="submit" class="btn-primary">Mentés</button>
+                    <button type="button" onclick="hideCrudForm()" class="btn-secondary">Mégse</button>
+                </div>
+            </form>
+        </section>
