@@ -73,3 +73,13 @@ if (empty($input['subject']) || !is_string($input['subject'])) {
         $errors[] = 'A tárgy 2-200 karakter között kell legyen.';
     }
 }
+
+// Üzenet validáció
+if (empty($input['message']) || !is_string($input['message'])) {
+    $errors[] = 'Az üzenet mező kötelező.';
+} else {
+    $message = trim($input['message']);
+    if (strlen($message) < 5 || strlen($message) > 5000) {
+        $errors[] = 'Az üzenet 5-5000 karakter között kell legyen.';
+    }
+}
