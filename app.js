@@ -165,3 +165,56 @@ function handleLogin(event) {
     alert('Sikeres bejelentkezés!');
     window.location.href = 'index.html';
 }
+
+function handleRegister(event) {
+    event.preventDefault();
+    const username = document.getElementById('reg-username').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const firstName = document.getElementById('reg-firstname').value.trim();
+    const lastName = document.getElementById('reg-lastname').value.trim();
+    const password = document.getElementById('reg-password').value;
+    const passwordConfirm = document.getElementById('reg-password-confirm').value;
+    const errors = [];
+
+    if (!username || !email || !firstName || !lastName || !password || !passwordConfirm) {
+        errors.push('Minden mező kitöltése kötelező.');
+    }
+    if (password !== passwordConfirm) {
+        errors.push('A jelszavak nem egyeznek.');
+    }
+    if (!validateEmail(email)) {
+        errors.push('Érvényes email címet adjon meg.');
+    }
+
+    const users = getStorage(STORAGE_KEYS.users) || [];
+    if (users.some(u => u.username === username)) {
+        errors.push('A felhasználónév már foglalt.');
+    }
+    if (users.some(u => u.email === email)) {
+        errors.push('Ez az email cím már regisztrálva van.');
+    }
+
+    const errorBox = document.getElementById('register-errors');
+    if (errors.length) {
+        errorBox.innerHTML = errors.map(msg => `<p class="error">${msg}</p>`).join('');
+        errorBox.style.display = 'block';
+        return;
+    }
+
+    errorBox.style.display = 'none';
+    users.push({
+        username,
+        email,
+        firstName,
+        lastName,
+        password: btoa(password)
+    });
+    setStorage(STORAGE_KEYS.users, users);
+
+    alert('Sikeres regisztráció! Most jelentkezzen be.');
+    showTab('login');
+}
+
+function validateEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
