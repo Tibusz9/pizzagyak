@@ -24,3 +24,14 @@
             </div>
         </nav>
     </header>
+
+    <main class="container">
+        <h2>Képtár</h2>
+        <div id="login-notice" style="margin-bottom:1.5rem;"><p>Képek feltöltéséhez <a href="auth.html" style="color:#667eea;font-weight:600;">jelentkezzen be</a>.</p></div>
+        <div id="upload-section" style="display:none;margin-bottom:2rem;background:white;padding:1.5rem;border-radius:10px;box-shadow:0 4px 15px rgba(0,0,0,0.1);">
+            <h3>Kép Feltöltése</h3>
+            <form onsubmit="handleImageUpload(event)">
+                <div class="form-group"><label for="image-input">Válasszon képet:</label><input type="file" id="image-input" accept="image/*" required><small>Támogatott: JPG, PNG, GIF</small></div>
+                <button type="submit" class="btn-primary">Feltöltés</button>
+            </form>
+        </div>
